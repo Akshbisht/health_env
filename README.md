@@ -1,16 +1,32 @@
+---
+title: Parent-Child Health Decision Maker
+emoji: 🧒
+colorFrom: red
+colorTo: yellow
+sdk: docker
+sdk_version: "0.15.1"
+python_version: "3.10.12"
+app_file: server.py
+pinned: false
+---
 # Health-Based Parent-Child Decision Maker
 
-An [OpenEnv](https://openenv.dev)-compatible reinforcement learning environment where an AI agent assists a worried parent in triaging their sick child to the correct care pathway.
+
+An OpenEnv-compatible reinforcement learning environment where an AI agent assists a worried parent in triaging their sick child to the correct care pathway.
+
 
 ---
 
 ## Motivation
 
+
 Parents face a high-stakes, high-anxiety decision daily: **"Should I take my child to the ER, urgent care, or just keep them home?"** Getting this wrong in either direction has real consequences — over-triaging burdens emergency services; under-triaging risks lives. This environment trains agents to ask the right clarifying questions and apply clinical red-flag reasoning.
+
 
 ---
 
 ## Tasks
+
 
 | Task | Difficulty | Correct Pathway | Key Challenge |
 |------|-----------|----------------|---------------|
@@ -18,9 +34,11 @@ Parents face a high-stakes, high-anxiety decision daily: **"Should I take my chi
 | `medium_asthma` | Medium | `urgent_care` | Recognise borderline SpO2 + known asthma |
 | `hard_meningitis_risk` | Hard | `er_immediately` | Catch non-blanching rash + neck stiffness fast |
 
+
 ---
 
 ## Observation Space
+
 
 ```json
 {
@@ -34,17 +52,22 @@ Parents face a high-stakes, high-anxiety decision daily: **"Should I take my chi
 }
 ```
 
+
 ## Action Space
+
 
 ```json
 { "message": "string — agent response/question/recommendation" }
 ```
 
+
 To trigger episode end, include `RECOMMENDATION: <pathway>` anywhere in the message.
+
 
 ---
 
 ## Reward Function
+
 
 | Component | Max Value | Condition |
 |-----------|-----------|-----------|
@@ -53,11 +76,14 @@ To trigger episode end, include `RECOMMENDATION: <pathway>` anywhere in the mess
 | Red-flag acknowledgment | +0.2 | Hard task only |
 | Dangerous recommendation | -0.5 | Home care for ER case |
 
+
 Total score is clamped to `[0.0, 1.0]`.
+
 
 ---
 
 ## API Endpoints
+
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -66,38 +92,48 @@ Total score is clamped to `[0.0, 1.0]`.
 | `GET`  | `/state` | Inspect current environment state |
 | `GET`  | `/tasks` | List all available tasks |
 
+
 **Reset request:**
 ```json
 { "task": "easy_fever" }
 ```
+
 
 **Step request:**
 ```json
 { "task": "easy_fever", "message": "Does the child have any rashes?" }
 ```
 
+
 ---
 
 ## Setup & Usage
 
+
 ### Local
+
 
 ```bash
 pip install -r requirements.txt
 uvicorn server:app --port 7860
 
+
 # Test reset
 curl -X POST http://localhost:7860/reset -H "Content-Type: application/json" -d '{"task":"easy_fever"}'
 ```
 
+
 ### Docker
+
 
 ```bash
 docker build -t health-env .
 docker run -p 7860:7860 health-env
 ```
 
+
 ### Run Inference
+
 
 ```bash
 export HF_TOKEN=your_key
@@ -106,9 +142,11 @@ export ENV_BASE_URL=http://localhost:7860
 python inference.py
 ```
 
+
 ---
 
 ## Baseline Scores (Qwen2.5-72B-Instruct)
+
 
 | Task | Score |
 |------|-------|
@@ -116,8 +154,10 @@ python inference.py
 | medium_asthma | ~0.65 |
 | hard_meningitis_risk | ~0.55 |
 
+
 ---
 
 ## HuggingFace Space
 
-Tagged with `openenv`. Space URL: `https://<your-username>-health-env.hf.space`
+
+Tagged with `openenv`. Space URL: `https://akaashdfjndf-health-env.hf.space`
