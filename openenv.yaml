@@ -1,0 +1,59 @@
+name: health-parent-child-decision-maker
+version: "1.0.0"
+description: >
+  A pediatric health triage environment where an AI agent assists a parent
+  in deciding the correct care pathway for a sick child: home care, urgent care,
+  or emergency room. Covers real-world clinical decision-making with three
+  difficulty levels based on symptom severity and red-flag recognition.
+
+author: Akash Bisht
+tags:
+  - openenv
+  - healthcare
+  - triage
+  - pediatrics
+  - decision-making
+
+tasks:
+  - name: easy_fever
+    description: 4-year-old with low-grade fever and mild cold symptoms. Correct pathway: home_care.
+    difficulty: easy
+    max_steps: 8
+
+  - name: medium_asthma
+    description: 7-year-old asthmatic with mild respiratory distress and borderline SpO2. Correct pathway: urgent_care.
+    difficulty: medium
+    max_steps: 8
+
+  - name: hard_meningitis_risk
+    description: 2-year-old with non-blanching rash, neck stiffness, photophobia — classic meningitis warning signs. Correct pathway: er_immediately.
+    difficulty: hard
+    max_steps: 8
+
+observation_space:
+  child_profile: object
+  presenting_symptoms: array of strings
+  vitals: object
+  conversation_history: array of message objects
+  current_step: integer
+  task_name: string
+  instructions: string
+
+action_space:
+  message: string — agent's response/question/recommendation to the parent
+
+reward_range: [0.0, 1.0]
+reward_description: >
+  Partial credit for asking relevant clarifying questions (up to 0.3),
+  correct final recommendation (0.7), red-flag acknowledgment in hard task (0.2 bonus).
+  Penalty of -0.5 for dangerous recommendation (e.g. home care for ER case).
+
+endpoints:
+  reset: POST /reset
+  step: POST /step
+  state: GET /state
+  tasks: GET /tasks
+
+docker:
+  build_context: .
+  port: 7860
